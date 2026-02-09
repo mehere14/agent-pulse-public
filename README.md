@@ -450,6 +450,41 @@ const result = await agent.run("A futuristic city skyline in neon colors.");
 // "![Generated Image](data:image/png;base64,...)" or "![Generated Image](https://...)"
 ```
 
+#### Image Editing (Reference Image)
+
+Edit or remix an existing image by passing `reference_image` in config. This is **provider-agnostic** — the same code works with both Grok and Google providers.
+
+```typescript
+import { Agent, grok } from 'agent-pulse';
+
+const agent = new Agent({
+  name: 'editor',
+  provider: new grok('grok-imagine-image'),
+  config: {
+    aspect_ratio: '3:4',
+    response_format: 'b64_json',
+    reference_image: 'data:image/png;base64,iVBORw0KGgo...' // base64 data URI
+  }
+});
+
+const result = await agent.run("Change the background to a sunset beach.");
+// result.content contains the edited image as a markdown data URI
+```
+
+To swap providers, just change the provider line — `reference_image` works the same way:
+
+```typescript
+// Grok
+provider: new grok('grok-imagine-image', process.env.GROK_API_KEY)
+
+// Google Gemini
+provider: new google('gemini-2.5-flash-image', process.env.GOOGLE_API_KEY)
+```
+
+> **How it works under the hood:**
+> - **Grok**: Sends a JSON request to `/v1/images/edits` with `image_url` (since the OpenAI SDK's `images.edit()` uses multipart/form-data, which x.ai doesn't support).
+> - **Google**: Injects the image as `inlineData` alongside the text prompt in the multimodal content.
+
 #### Google (Gemini)
 Gemini models can generate images as part of their response.
 
