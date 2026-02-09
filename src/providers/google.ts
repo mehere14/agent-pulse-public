@@ -200,6 +200,22 @@ export class GoogleProvider implements LLMProvider {
             }
         }
 
+        // Inject reference_image from config as inlineData (provider-agnostic image editing)
+        if (config?.reference_image) {
+            const dataUriMatch = String(config.reference_image).match(/^data:(image\/\w+);base64,(.+)$/);
+            if (dataUriMatch) {
+                const lastUserMsg = [...contents].reverse().find((c: any) => c.role === 'user');
+                if (lastUserMsg) {
+                    lastUserMsg.parts.push({
+                        inlineData: {
+                            mimeType: dataUriMatch[1],
+                            data: dataUriMatch[2]
+                        }
+                    });
+                }
+            }
+        }
+
         // 4. Call API (Streaming)
         const result = await this.client.models.generateContentStream({
             model: this.model,

@@ -23,14 +23,45 @@ class GrokProvider {
             const promptText = Array.isArray(prompt)
                 ? prompt.filter(m => m.role === 'user').map(m => m.content).join('\n')
                 : String(prompt);
-            const response = await this.client.images.generate({
-                model: this.model,
-                prompt: promptText,
-                n: config?.n || 1,
-                response_format: config?.response_format || 'b64_json',
-                ...(config?.aspect_ratio && { aspect_ratio: config.aspect_ratio }),
-            });
-            const images = response.data;
+            let images;
+            if (config?.reference_image || config?.image_url) {
+                // Image editing — direct JSON request to /v1/images/edits
+                // (OpenAI SDK's images.edit() uses multipart/form-data, but x.ai requires JSON)
+                const imageUrl = config.reference_image || config.image_url;
+                const body = {
+                    model: this.model,
+                    prompt: promptText,
+                    image_url: imageUrl,
+                    n: config?.n || 1,
+                    response_format: config?.response_format || 'b64_json',
+                    ...(config?.aspect_ratio && { aspect_ratio: config.aspect_ratio }),
+                };
+                const res = await fetch('https://api.x.ai/v1/images/edits', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.client.apiKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body),
+                });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`Request failed with status ${res.status}: ${errText}`);
+                }
+                const json = await res.json();
+                images = json.data;
+            }
+            else {
+                // Standard image generation
+                const response = await this.client.images.generate({
+                    model: this.model,
+                    prompt: promptText,
+                    n: config?.n || 1,
+                    response_format: config?.response_format || 'b64_json',
+                    ...(config?.aspect_ratio && { aspect_ratio: config.aspect_ratio }),
+                });
+                images = response.data;
+            }
             const markdownParts = images.map((img, i) => {
                 if (img.b64_json) {
                     return `![Generated Image${images.length > 1 ? ` ${i + 1}` : ''}](data:image/png;base64,${img.b64_json})`;
