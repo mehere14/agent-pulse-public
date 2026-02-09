@@ -26,13 +26,12 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/mehere14/Agentic-Framework.git",
-        "directory": "agent-pulse"
+        "url": "git+https://github.com/mehere14/agent-pulse-public.git"
     },
     "bugs": {
-        "url": "https://github.com/mehere14/Agentic-Framework/issues"
+        "url": "https://github.com/mehere14/agent-pulse-public/issues"
     },
-    "homepage": "https://github.com/mehere14/Agentic-Framework/tree/main/agent-pulse#readme",
+    "homepage": "https://github.com/mehere14/agent-pulse-public#readme",
     "dependencies": {
         "@google/genai": "^1.33.0",
         "dotenv": "^16.4.5",

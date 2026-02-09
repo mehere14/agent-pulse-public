@@ -448,10 +448,6 @@ const agent = new Agent({
     provider: new MyProvider('my-model')
 });
 ```
-## To locally link the package
-
-1. Run `npm link` in the agent-pulse directory
-2. Run `npm link agent-pulse --legacy-peer-deps` in your project directory
 
 ## License
 
