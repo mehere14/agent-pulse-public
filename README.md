@@ -99,19 +99,19 @@ import { Agent, openAI, google, grok } from 'agent-pulse';
 // OpenAI
 const bot1 = new Agent({
     name: 'gpt-bot',
-    provider: new openAI('gpt-4o')
+    provider: new openAI('gpt-5.2')
 });
 
 // Google Gemini
 const bot2 = new Agent({
     name: 'gemini-bot',
-    provider: new google('gemini-1.5-pro')
+    provider: new google('gemini-3-pro')
 });
 
 // xAI / Grok
 const bot3 = new Agent({
     name: 'grok-bot',
-    provider: new grok('grok-beta')
+    provider: new grok('grok-4.2')
 });
 ```
 
@@ -217,7 +217,7 @@ const summaryTool = {
 
 const agent = new Agent({
   name: 'intake',
-  provider: new google('gemini-1.5-pro'),
+  provider: new google('gemini-3-pro'),
   tools: [summaryTool]
 });
 
@@ -263,7 +263,7 @@ By setting `max_tool_iterations`, the agent can autonomously call tools, receive
 ```typescript
 const agent = new Agent({
   name: 'researcher',
-  provider: new openAI('gpt-4o'),
+  provider: new openAI('gpt-5.2'),
   tools: [weatherTool, searchTool],
   max_tool_iterations: 5 // Allow up to 5 loop turns
 });
@@ -280,7 +280,7 @@ If your agent is running on a server but needs the **client** to perform an acti
 ```typescript
 const agent = new Agent({
   name: 'account-mgr',
-  provider: new openAI('gpt-4o'),
+  provider: new openAI('gpt-5.2'),
   tools: [requestConfirmationTool]
 });
 
@@ -312,7 +312,7 @@ The same pattern works for Gemini! While Google's API uses a different internal 
 ```typescript
 const agent = new Agent({
   name: 'gemini-agent',
-  provider: new google('gemini-1.5-flash')
+  provider: new google('gemini-3-flash')
 });
 
 const final = await agent.run([
@@ -340,7 +340,7 @@ import { Agent, openAI } from 'agent-pulse';
 
 const agent = new Agent({
   name: 'analyst',
-  provider: new openAI('gpt-4o'),
+  provider: new openAI('gpt-5.2'),
   // You can pass file paths (if handled by environment) or load content yourself
   files: ['/path/to/data.txt'] 
 });
@@ -362,7 +362,7 @@ const recipeSchema = z.object({
 
 const agent = new Agent({
   name: 'chef',
-  provider: new google('gemini-1.5-pro'),
+  provider: new google('gemini-3-pro'),
   output_schema: recipeSchema
 });
 
@@ -389,7 +389,7 @@ app.get('/chat', async (req, res) => {
 
   const agent = new Agent({ 
       name: 'web-bot', 
-      provider: new openAI('gpt-4o') 
+      provider: new openAI('gpt-5.2') 
   });
   
   // Connect agent events to the response stream
@@ -409,7 +409,7 @@ import { Agent, google } from 'agent-pulse';
 
 const agent = new Agent({
   name: 'researcher',
-  provider: new google('gemini-2.5-flash-lite'),
+  provider: new google('gemini-3-flash'),
   config: {
     googleSearch: true
   }
@@ -423,6 +423,47 @@ agent.on('response', (result) => {
 });
 
 await agent.run("Who won the Super Bowl in 2024?");
+```
+
+### 7. Image Generation
+
+Generate images by setting the agent's model to an image generation model (e.g., `grok-imagine-image` for xAI or models like `gemini-1.5-pro` for Google).
+
+#### xAI (Grok Imagine)
+xAI uses `aspect_ratio` instead of `size`.
+
+```typescript
+import { Agent, grok } from 'agent-pulse';
+
+const agent = new Agent({
+  name: 'artist',
+  provider: new grok('grok-imagine-image'),
+  config: {
+    aspect_ratio: '16:9', // Supported: "1:1", "16:9", "9:16", "4:3", "3:2", etc.
+    response_format: 'b64_json' // Get base64 data instead of temporary URLs
+  }
+});
+
+const result = await agent.run("A futuristic city skyline in neon colors.");
+
+// result.content will contain markdown image strings:
+// "![Generated Image](data:image/png;base64,...)" or "![Generated Image](https://...)"
+```
+
+#### Google (Gemini)
+Gemini models can generate images as part of their response.
+
+```typescript
+import { Agent, google } from 'agent-pulse';
+
+const agent = new Agent({
+  name: 'painter',
+  provider: new google('gemini-3-pro')
+});
+
+const result = await agent.run("Generate an image of a serene mountain lake.");
+
+// result.content will contain the markdown image string.
 ```
 
 ## Extensibility: Custom Providers
