@@ -27,6 +27,39 @@ export class GrokProvider implements LLMProvider {
         onToken: (token: string) => void
     ): Promise<AgentResponse> {
 
+        // Image generation mode — route to images API instead of chat completions
+        if (this.model.includes('imagine')) {
+            const promptText = Array.isArray(prompt)
+                ? prompt.filter(m => m.role === 'user').map(m => m.content).join('\n')
+                : String(prompt);
+
+            const response = await (this.client.images.generate as any)({
+                model: this.model,
+                prompt: promptText,
+                n: config?.n || 1,
+                response_format: config?.response_format || 'b64_json',
+                ...(config?.aspect_ratio && { aspect_ratio: config.aspect_ratio }),
+            });
+
+            const images = response.data;
+
+            const markdownParts: string[] = images.map((img: any, i: number) => {
+                if (img.b64_json) {
+                    return `![Generated Image${images.length > 1 ? ` ${i + 1}` : ''}](data:image/png;base64,${img.b64_json})`;
+                }
+                return `![Generated Image${images.length > 1 ? ` ${i + 1}` : ''}](${img.url})`;
+            });
+
+            const content = markdownParts.join('\n\n');
+            onToken(content);
+
+            return {
+                content,
+                usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+                meta: { model: this.model, latency_ms: 0 }
+            };
+        }
+
         // 1. Prepare messages
         const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
         if (system) {
