@@ -1,5 +1,8 @@
 # Agent Pulse
 
+[![AgentAudit Security](https://img.shields.io/badge/AgentAudit-Safe-brightgreen?logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAxTDMgNXY2YzAgNS41NSAzLjg0IDEwLjc0IDkgMTIgNS4xNi0xLjI2IDktNi40NSA5LTEyVjVsLTktNHoiLz48L3N2Zz4=)](https://www.agentaudit.dev/skills/agent-pulse)
+
+
 **Agent Pulse** is a lightweight, native-first, event-driven framework for building agentic AI applications in JavaScript and TypeScript.
 
 It is designed to be "Zero Boilerplate," getting you from install to running agent in seconds, while supporting powerful patterns like streaming, tool execution, and workflow chaining.
